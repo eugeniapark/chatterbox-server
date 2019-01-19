@@ -93,7 +93,6 @@ var requestHandler = function(request, response) {
       if (request.url === '/classes/messages') {
       statusCode = 200;
       // return the object with a results property that stores: an array of objects
-      response._data = resultObj;
       } else {
         statusCode = 404;
       }
@@ -101,10 +100,22 @@ var requestHandler = function(request, response) {
       // right now,  we're sending back an array if it's a post
       statusCode = 201;
       // take the message that was posted and add it to the array at response.
-        // coming in as a real object that we have to stringify
-      message = request._postData; 
-      resultObj.results.push(message);  //if not push, concat
-      response._data = resultObj;
+        // coming in as a real object that we have to stringify 
+        let body = [];
+        request.on('data', (chunk) => {
+          body.push(chunk);
+        }).on('end', () => {
+          // console.log(body);
+          body = Buffer.concat(body).toString();
+          console.log(body);  //{"username":"Jono","text":"Do my bidding!"}
+          // at this point, `body` has the entire request body stored in it as a string
+          body = JSON.parse(body);
+          resultObj.results.push(body);
+        });
+
+
+      // resultObj.results.push(message); 
+
     }
 
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
