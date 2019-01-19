@@ -1,6 +1,4 @@
-// url - this is an external library we are importing 
 
-var url = require('url');
 
 /*************************************************************
 
@@ -26,53 +24,57 @@ this file and include it in basic-server.js so that it actually works.
   // http://nodejs.org/documentation/api/
   
   // modify the response. depending on the request properties
+
+//Requiring the external URL library that will be used later
+var url = require('url');
+//Stores all of the 'POST' data sent from client to the server 
 var resultObj = { results: [] };
 
+//How the server handles the requests coming from the client to the server to create the response
 var requestHandler = function(request, response) {
     // The outgoing status. This is what we want to send back when handler.requestHandler(req, res) is invoked
     var headers = defaultCorsHeaders;
     var message;
+    //Default code to send back status of the client's request
     var statusCode = 200;
     let urlObj = url.parse(request.url);
+    //If client sends 'GET' request to server to get the messages
     if (request.method === 'GET') {
+      //Check if it's coming from an acceptable URL
       if (urlObj.pathname === '/classes/messages') {
-      statusCode = 200;
-      // return the object with a results property that stores: an array of objects
+      //If it doesn't, it sends back the error code
       } else {
         statusCode = 404;
       }
+    //if the the request is a 'POST', it asks the server to store a message
     } else if (request.method === 'POST') {
-      // right now,  we're sending back an array if it's a post
       statusCode = 201;
       // take the message that was posted and add it to the array at response.
-        // coming in as a real object that we have to stringify 
+        // coming in as a stringified object
+        //Creates an array, take the relevant bits, parses and stores
         let body = [];
         request.on('data', (chunk) => {
           body.push(chunk);
         }).on('end', () => {
-          // console.log(body);
+          //Buffer takes in the relevant bits, turns it into a string, and parses it into an object
           body = Buffer.concat(body).toString();
-          // at this point, `body` has the entire request body stored in it as a string
+          // at this point, `body` has the entire request body stored as a string
           body = JSON.parse(body);
           resultObj.results.push(body);
         });
-    }
+      }
 
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
-  // Tell the client we are sending them plain text.
-  
-  // You will need to change this if you are sending something
-  // other than plain text, like JSON or HTML.
-    // I think we are sending back a JSON.stringified object...
-  headers['Content-Type'] = 'application/json'; // change text/plain to something else???
+  //Changes the content type to match the request which is a stringified JSON object
+  headers['Content-Type'] = 'application/json';
 
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
-  
+  // .writeHead() writes to the request line and headers of the response, which includes the status and all headers.
+  //Constructing the response by changing the writeHead property
   response.writeHead(statusCode, headers);
   
-  response.end(JSON.stringify(resultObj)); // stringified object?
+  //Sends the response object in stringified format to the client
+  response.end(JSON.stringify(resultObj));
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -85,6 +87,7 @@ var requestHandler = function(request, response) {
 // Another way to get around this restriction is to serve your chat
 // client from this domain by setting up static file serving.
 
+//CORS allows servers to accept request from client's on different URLs
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -92,5 +95,5 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+//Exporting the module allows other files to access the request handler: basic-server
 module.exports.requestHandler = requestHandler;
-
