@@ -2,7 +2,7 @@ var handler = require('../request-handler');
 var expect = require('chai').expect;
 var stubs = require('./Stubs');
 
-describe('Node Server Request Listener Function', function() {
+xdescribe('Node Server Request Listener Function', function() {
   it('Should answer GET requests for /classes/messages with a 200 status code', function() {
     // This is a fake server request. Normally, the server would provide this,
     // but we want to test our function's behavior totally independent of the server code
@@ -62,8 +62,8 @@ describe('Node Server Request Listener Function', function() {
     expect(res._responseCode).to.equal(201);
 
     // Testing for a newline isn't a valid test
-    // TODO: Replace with with a valid test
-    // expect(res._data).to.equal(JSON.stringify('\n'));
+// TODO: Replace with with a valid test - DONE - PLEASE SEE LINE 66, SHOULD RETURN ARRAY OF OBJECT MESSAGES
+    // expect(res._data).to.equal(JSON.stringify({ results: });
     expect(res._ended).to.equal(true);
   });
 
@@ -86,7 +86,9 @@ describe('Node Server Request Listener Function', function() {
     handler.requestHandler(req, res);
 
     expect(res._responseCode).to.equal(200);
+    // turning stringified array of object into an array of objects
     var messages = JSON.parse(res._data).results;
+    console.log('these are the messages', messages[0].username);
     expect(messages.length).to.be.above(0);
     expect(messages[0].username).to.equal('Jono');
     expect(messages[0].text).to.equal('Do my bidding!');
