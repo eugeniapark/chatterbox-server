@@ -90,9 +90,13 @@ var requestHandler = function(request, response) {
     var message;
 
     if (request.method === 'GET') {
+      if (request.url === '/classes/messages') {
       statusCode = 200;
       // return the object with a results property that stores: an array of objects
       response._data = resultObj;
+      } else {
+        statusCode = 404;
+      }
     } else if (request.method === 'POST') {
       // right now,  we're sending back an array if it's a post
       statusCode = 201;
